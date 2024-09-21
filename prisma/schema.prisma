@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+}
+ 
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+ 
+enum UserRole {
+  USER
+  ADMIN
+}
+ 
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(USER)
+  password      String
+  accounts      Account[]
+  sessions      Session[]
+  isVerfied     Boolean   @default(false)
+  token         Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+model Message {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  firstName      String
+  lastName        String
+  email    String
+  message    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+model Skill {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  slug        String @unique
+  icon    String?
+  percent    Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+model Service {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  slug        String @unique
+  imageUrl    String?
+  description    String
+  slogan String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+model Experience {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  period String
+  company String
+  description    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+model Settings {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  phone String @default("+256 762 063 160")
+  email    String @default("jb@desishub.com")
+  location    String @default("Kamapala - Uganda")
+  cvUrl    String @default("")
+  imageUrl    String @default("https://media.licdn.com/dms/image/v2/D4D03AQGF6VjIJLtoUQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1715308238190?e=1729728000&v=beta&t=0GHafYJhWPOzYV0knV3EtcQffAa0334rP7v82t2Nyi0")
+  linkedin    String @default("www.linkedin.com/in/muke-johnbaptist-95bb82198")
+  twitter    String @default("https://x.com/MJohnbaptist")
+  instagram    String @default("")
+  github    String @default("https://github.com/MUKE-coder/")
+  youTube    String @default("https://www.youtube.com/@JBWEBDEVELOPER")
+  profileName    String @default("Muke Johnbaptist")
+  animatedText    String @default("Youtuber,Tutor,Fullstack developer,Muke Johnbaptist, Jb web developer")
+  profileDescription    String @default("I have been a full stack web developer since 2022 and I love building Software and Sharing, but it wasn't always like that. I went through a four-year Mechanical Engineering Course and it had nothing to do with Software development.")
+  profileLineOne    String @default("Senior Developer and")
+  profileLineTwo    String @default("Fullstack Engineer ")
+  profileLineThree    String @default("Based in Kampala, Uganda.")
+  yearsOfExperience    Int @default(4)
+  clients    Int @default(36)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model ProjectCategory {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String    @unique
+  products    Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+model BlogCategory {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String    @unique
+  blogs    Blog[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+model Blog {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  slug          String   @unique
+  imageUrl      String?
+  tags          String?
+  summary   String?
+  content   String?
+  categoryId    String   @db.ObjectId
+  category      BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+ 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+model Project {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  slug          String   @unique
+  imageUrl      String?
+  tags          String?
+  description   String?
+  categoryId    String   @db.ObjectId
+  github        String?
+  hostedLink    String?
+  category      ProjectCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+ 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
